@@ -1,0 +1,5 @@
+*.bak
+*.json
+*.bmp
+*.log
+__pycache__

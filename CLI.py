@@ -27,7 +27,7 @@ if args.test:
     print('pytesseract test: result:{} expect:{}'.format(code,'2558'))
     exit()
     
-with open(args.json) as f:
+with open(args.path) as f:
     config = json.load(f)
 teacher_list = config['teacher_list']
 

