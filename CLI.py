@@ -35,7 +35,7 @@ teacher_list = config['teacher_list']
 verbose = not args.quiet
 
 if args.report or args.extract:
-    report_cache(teacher_list, detail = args.extract)
+    report_cache(teacher_list, extract = args.extract)
 if args.dump:
     password_dump_teacher(teacher_list, verbose = verbose)
 

@@ -196,11 +196,11 @@ def password_dump_cache(username, password_set, cache_name = None,
                          callback = _callback, prev_rd = prev_rd,
                          verbose = verbose)
     
-def password_dump_four(teacher_list):
+def password_dump_four(teacher_list, verbose = True):
     # [(username1, birth1), ..., (username_n,birth_n)]
     for username, birth in teacher_list:
         password_set = [birth[-2:]+str(n).zfill(4) for n in range(0,10000)]
-        password_dump_cache(username, password_set)
+        password_dump_cache(username, password_set, verbose = verbose)
         
 def password_dump_six(teacher_list, verbose = True):
     # ID last six digit
@@ -208,7 +208,7 @@ def password_dump_six(teacher_list, verbose = True):
         password_set = [str(n).zfill(6) for n in range(10000,320000)]
         password_dump_cache(username, password_set, verbose = verbose)
         
-def password_dump_teacher(teacher_list):
+def password_dump_teacher(teacher_list, verbose = True):
     # proxy for union iterface `password_dump_teacher`, `password_dump_si`
     head = teacher_list[0]
     try:
@@ -217,16 +217,16 @@ def password_dump_teacher(teacher_list):
     except:
         label = 'six'
     if label == 'four':
-        password_dump_four(teacher_list)
+        password_dump_four(teacher_list, verbose = verbose)
     elif label == 'six':
-        password_dump_six(teacher_list)
+        password_dump_six(teacher_list, verbose = verbose)
     else:
         raise Exception('Unknow config info')
         
 def report_cache(teacher_list, extract = False):
     td = {}
     if not isinstance(teacher_list[0], (str,int,float)):
-        teacher_list = zip(*teacher_list)[0]
+        teacher_list = list(zip(*teacher_list))[0]
     for username in teacher_list:
         #print('check username {}'.format(username))
         if not os.path.exists('{}.json'.format(username)):
@@ -242,7 +242,7 @@ def report_cache(teacher_list, extract = False):
             print('{}: true {} false {} none {} / {}'.format(username,true_count,false_count,none_count,count ))
             if extract:
                 if false_count <= 3:
-                    print([value for value in info.values() if value == False])
+                    print([key for key,value in info.items() if value == False])
                 else:
                     print('false_count > 3, extract action truncated.')
     return td
@@ -272,6 +272,7 @@ username birth password
 20010092 19640609 092149
 19980082 19630904 040420
 19930026 19680401 None
+19910008 19630405 053730
 password_dump_teacher([('20010092', '19640609'),
                        ('19980082', '19630904'),
                        ('19930026', '19680401')])
