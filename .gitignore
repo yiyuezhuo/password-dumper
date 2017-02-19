@@ -1,5 +1,5 @@
 *.bak
-*.json
 *.bmp
 *.log
+*.html
 __pycache__
